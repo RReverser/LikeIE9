@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style type="text/css">
+   #list, #list ul { list-style: none }
+   ul, .panel div { padding-left: 1em }
+   #list { padding-left: 0 }
+   a { text-decoration: none; border: 2px solid transparent; border-radius: 4px }
+   a:hover { border-color: #037; color: #037 }
+   #list img { padding-right: 2px; position: relative; top: 2px; height: 1em; width: 1em; background: transparent }
+   button { padding: 2px }
+   .panel div { margin: 2px 0 2px 0 }
+   #notFound { color: #E80; width: 90%; text-align: center; position: absolute; top: 50%; margin-top: -50px; display: none }
+</style>
+<script type="text/javascript">
+    function getStorage() { return JSON.parse(window.localStorage.list || '{}') }
+    function setStorage() { window.localStorage.list = JSON.stringify(storage || {}) }
+
+    var curList = {}, listEmpty = true, storage = getStorage();
+
+    function MsgHandler(event)
+    {
+        var data = event.data;
+        if(data.name == 'content')
+        {
+            if(listEmpty)
+            {
+                window.document.body.innerHTML = '<ul id=list></ul>';
+                listEmpty = false;
+            }
+            window.document.getElementById('list').innerHTML += ((data.href in curList) ? '' : data.content) + data.content2;
+            data.content2 = '';
+            curList[data.href] = data;
+        }
+    }
+
+    function loaded()
+    {
+        for(var i in storage) MsgHandler({data: storage[i]});
+
+        var items = document.querySelectorAll('#list input[type="checkbox"]');
+        for(var i = 0; i < items.length; i++) items[i].setAttribute('checked', true);
+
+        opera.extension.onmessage = MsgHandler;
+        opera.extension.postMessage({name: 'init'});
+        
+        var notFound = window.document.getElementById('notFound');
+        notFound.style.display = 'block';
+    }
+
+    function setStatus(checkBox)
+    {
+        var href = checkBox.previousSibling.href;
+        checkBox.checked ? storage[href] = curList[href] : delete storage[href];
+        setStorage();
+    }
+    
+    function btnClick(connNumber, btn)
+    {
+        if(btn.tagName == 'BUTTON') opera.extension.postMessage({name: 'button', content: btn.id, conn: connNumber});
+    }
+</script>
+</head>
+<body onload="loaded()">
+<span id="notFound">
+    <img src="warning.png" /><br />
+    There are no jump-lists in opened windows or in storage.
+</span>
+</body>
+</html>
