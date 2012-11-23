@@ -7,4 +7,4 @@ Currently supported features are:
  - icon overlay (changing favicon of sites and restoring them if cleared);
  - window.external object (with nops for unsupported functions).
 
-Extension page: https://addons.opera.com/extensions/details/likeie9/
+[Extension page](https://addons.opera.com/extensions/details/likeie9/)
